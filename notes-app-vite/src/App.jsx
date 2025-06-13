@@ -1,27 +1,57 @@
+import { useState } from "react";
 import Header from "./components/Header";
 import NoteList from "./components/NoteList";
+import NewNote from "./components/NewNoteForm";
+import NoteModal from "./components/NoteModal";
 
 function App() {
-  const notes = [
-    { title: "First Note", content: "This is the content of the first note." },
-    {
-      title: "Second Note",
-      content: "This is the content of the second note.",
-    },
-    { title: "Third Note", content: "This is the content of the third note." },
-    { title: "Third Note", content: "This is the content of the third note." },
+  const [notes, setNotes] = useState([]);
+  const [selectedNote, setSelectedNote] = useState(null);
 
-    { title: "Third Note", content: "This is the content of the third note." },
+  const handleAddNote = (newNote) => {
+    const noteWithId = {
+      ...newNote,
+      id: Math.random().toString(36).substring(2, 9), // random string like 'x2k3m9a'
+    };
+    setNotes([noteWithId, ...notes]);
+  };
 
-    { title: "Third Note", content: "This is the content of the third note." },
-  ];
+  const handleNoteClick = (note) => {
+    setSelectedNote(note);
+  };
+
+  const closeModal = () => {
+    setSelectedNote(null);
+  };
+
+  const handleSaveNote = (updatedNote) => {
+    setNotes((prevNotes) =>
+      prevNotes.map((note) => (note.id === updatedNote.id ? updatedNote : note))
+    );
+    closeModal();
+  };
+
+  const handleDeleteNote = (noteId) => {
+    setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId));
+    closeModal();
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
       <main className="p-4">
         <p className="text-gray-700">Welcome to your Notes App!</p>
-        <NoteList notes={notes} />
+        <NewNote onAddNote={handleAddNote} />
+        <NoteList notes={notes} onNoteClick={handleNoteClick} />
       </main>
+
+      {/* Reusable Modal Component */}
+      <NoteModal
+        note={selectedNote}
+        onClose={closeModal}
+        onSave={handleSaveNote}
+        onDelete={handleDeleteNote}
+      />
     </div>
   );
 }
